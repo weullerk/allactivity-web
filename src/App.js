@@ -14,6 +14,8 @@ import './assets/libs/bootstrap-touchspin/jquery.bootstrap-touchspin.min.css';
 
 import {useEffect, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
+import moment from "moment";
+
 import api from "./api";
 
 function App() {
@@ -27,6 +29,30 @@ function App() {
       'description': ''
     }
   });
+
+  useEffect(() => {
+
+    (async () => {
+      // list all logs
+      const response = await fetch(api.listLogs, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+        if (result.length > 0) {
+          setLogs(result);
+        } else {
+          setLogs(null);
+        }
+      }
+    })();
+
+  }, []);
 
   const submit = async (data) => {
     setStatus(null);
@@ -62,12 +88,10 @@ function App() {
     <header id="page-topbar">
       <div className="navbar-header">
         <div className="d-flex">
-
-
+            <h2 style={{paddingLeft: 32, paddingTop: 8}}>All Activity</h2>
         </div>
 
         <div className="d-flex">
-
         </div>
       </div>
   </header>
@@ -199,30 +223,37 @@ function App() {
                 <div className="card-body">
                   <h4 className="card-title mb-5">Logs</h4>
                   <div className="">
-                    <ul className="verti-timeline list-unstyled">
-                      <li className="event-list">
-                        <div className="event-timeline-dot">
-                          <i className="bx bx-right-arrow-circle"></i>
-                        </div>
-                        <div className="d-flex">
-                          <div className="flex-shrink-0 me-3">
-                            <i className="bx bx-copy-alt h2 text-primary"></i>
-                          </div>
-                          <div className="flex-grow-1">
-                            <div>
-                              <h5>Ordered</h5>
-                              <p className="text-muted">New common language will be more simple and regular than the existing.</p>
-
+                    {logs && (
+                      <ul className="verti-timeline list-unstyled">
+                        {logs.map((log, index) => (
+                          <li key={index} className="event-list">
+                            <div className="event-timeline-dot">
+                              <i className="bx bx-right-arrow-circle"></i>
                             </div>
-                          </div>
+                            <div className="d-flex">
+                              <div className="flex-shrink-0 me-3">
+                                <i className="bx bx-copy-alt h2 text-primary"></i>
+                              </div>
+                              <div className="flex-grow-1">
+                                <div>
+                                  <h5>{moment(log.start).format('MMMM Do YYYY, h:mm')} -
+                                    {moment(log.start).format('MMMM Do YYYY, h:mm')}</h5>
+                                  <p className="text-muted">{log.description}</p>
+
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {logs === null && (
+                      <div className="row">
+                        <div className="d-flex justify-content-center pb-5">
+                          No logs registered.
                         </div>
-                      </li>
-                    </ul>
-                    <div className="row">
-                      <div className="d-flex justify-content-center">
-                        No logs registered.
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
